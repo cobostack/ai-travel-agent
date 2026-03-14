@@ -1,15 +1,12 @@
 package com.example.travelagent.controller;
 
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
-import com.alibaba.cloud.ai.graph.agent.SupervisorAgent;
 import com.example.travelagent.service.TravelService;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 /**
  * 旅行助手 API 控制器
@@ -28,7 +25,6 @@ public class TravelController {
     private final TravelService travelService;
     private final ReactAgent weatherAgent;
     private final ReactAgent travelAgent;
-    private final SupervisorAgent travelSupervisor;
     
     /**
      * 查询天气

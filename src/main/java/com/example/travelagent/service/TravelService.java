@@ -1,7 +1,6 @@
 package com.example.travelagent.service;
 
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
-import com.alibaba.cloud.ai.graph.agent.SupervisorAgent;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ public class TravelService {
     
     private final ReactAgent weatherAgent;
     private final ReactAgent travelAgent;
-    private final SupervisorAgent travelSupervisor;
     
     /**
      * 查询天气
@@ -59,8 +57,11 @@ public class TravelService {
                 city
         );
         
-        // 调用 SupervisorAgent 自动协调
-        return travelSupervisor.run(prompt);
+        // 先查询天气，再生成推荐
+        String weather = weatherAgent.run(String.format("请查询 %s 的天气", city));
+        String recommendation = travelAgent.run(String.format("基于以下天气信息，为 %s 生成出行推荐：%s", city, weather));
+        
+        return String.format("🌤️ 天气信息：\n%s\n\n🎯 出行推荐：\n%s", weather, recommendation);
     }
     
     /**
@@ -69,7 +70,11 @@ public class TravelService {
     public String chat(String message) {
         log.info("💬 Service - 智能问答: {}", message);
         
-        // 调用 SupervisorAgent 自动路由
-        return travelSupervisor.run(message);
+        // 根据消息内容决定调用哪个 Agent
+        if (message.contains("天气") || message.contains("温度")) {
+            return weatherAgent.run(message);
+        } else {
+            return travelAgent.run(message);
+        }
     }
 }

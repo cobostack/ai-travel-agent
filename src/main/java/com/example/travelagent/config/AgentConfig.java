@@ -1,8 +1,6 @@
 package com.example.travelagent.config;
 
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
-import com.alibaba.cloud.ai.graph.agent.SequentialAgent;
-import com.alibaba.cloud.ai.graph.agent.SupervisorAgent;
 import com.alibaba.cloud.ai.graph.checkpoint.savers.MemorySaver;
 import com.example.travelagent.tool.TravelRecommendationTool;
 import com.example.travelagent.tool.WeatherTool;
@@ -18,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
  * 配置两个 Agent：
  * 1. WeatherAgent - 天气查询 Agent
  * 2. TravelAgent - 出行推荐 Agent
- * 3. SupervisorAgent - 协调管理 Agent
  */
 @Configuration
 public class AgentConfig {
@@ -114,67 +111,6 @@ public class AgentConfig {
                                 .inputType(TravelRecommendationTool.TravelRequest.class)
                                 .build()
                 )
-                .build();
-    }
-    
-    /**
-     * 顺序执行 Agent（天气 → 出行推荐）
-     * 
-     * 流程：
-     * 1. 先调用 WeatherAgent 查询天气
-     * 2. 再调用 TravelAgent 生成出行推荐
-     */
-    @Bean
-    public SequentialAgent travelPlanningAgent(ReactAgent weatherAgent, ReactAgent travelAgent) {
-        return SequentialAgent.builder()
-                .name("TravelPlanningAgent")
-                .description("旅行规划 Agent：先查询天气，再生成出行推荐")
-                .addStep(weatherAgent)
-                .addStep(travelAgent)
-                .build();
-    }
-    
-    /**
-     * 监督者 Agent（协调管理）
-     * 
-     * 职责：
-     * 1. 接收用户请求
-     * 2. 分配给子 Agent 执行
-     * 3. 整合结果返回给用户
-     */
-    @Bean
-    public SupervisorAgent travelSupervisorAgent(
-            ReactAgent weatherAgent,
-            ReactAgent travelAgent,
-            SequentialAgent travelPlanningAgent) {
-        
-        String instruction = """
-                你是旅行助手系统的总协调员。
-                
-                职责：
-                1. 理解用户的旅行需求
-                2. 分配给合适的子 Agent 执行
-                3. 整合各 Agent 的结果
-                4. 向用户返回完整、清晰的回答
-                
-                子 Agent 说明：
-                - WeatherAgent: 专门查询天气
-                - TravelAgent: 专门生成出行推荐
-                - TravelPlanningAgent: 完整的旅行规划（天气+推荐）
-                
-                工作流程：
-                - 如果用户只问天气 → 调用 WeatherAgent
-                - 如果用户只问出行建议 → 调用 TravelAgent
-                - 如果用户需要完整规划 → 调用 TravelPlanningAgent
-                """;
-        
-        return SupervisorAgent.builder()
-                .name("TravelSupervisor")
-                .model(chatModel)
-                .instruction(instruction)
-                .enableLogging(true)
-                .saver(new MemorySaver())
-                .agents(weatherAgent, travelAgent, travelPlanningAgent)
                 .build();
     }
 }
