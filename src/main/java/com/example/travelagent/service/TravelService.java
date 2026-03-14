@@ -28,7 +28,7 @@ public class TravelService {
         String prompt = String.format("请查询 %s 的天气信息", city);
         
         // 调用 WeatherAgent
-        return weatherAgent.run(prompt);
+        return weatherAgent.call(prompt).getContent();
     }
     
     /**
@@ -43,7 +43,7 @@ public class TravelService {
         );
         
         // 调用 TravelAgent
-        return travelAgent.run(prompt);
+        return travelAgent.call(prompt).getContent();
     }
     
     /**
@@ -58,8 +58,8 @@ public class TravelService {
         );
         
         // 先查询天气，再生成推荐
-        String weather = weatherAgent.run(String.format("请查询 %s 的天气", city));
-        String recommendation = travelAgent.run(String.format("基于以下天气信息，为 %s 生成出行推荐：%s", city, weather));
+        String weather = weatherAgent.call(String.format("请查询 %s 的天气", city)).getContent();
+        String recommendation = travelAgent.call(String.format("基于以下天气信息，为 %s 生成出行推荐：%s", city, weather)).getContent();
         
         return String.format("🌤️ 天气信息：\n%s\n\n🎯 出行推荐：\n%s", weather, recommendation);
     }
@@ -72,9 +72,9 @@ public class TravelService {
         
         // 根据消息内容决定调用哪个 Agent
         if (message.contains("天气") || message.contains("温度")) {
-            return weatherAgent.run(message);
+            return weatherAgent.call(message).getContent();
         } else {
-            return travelAgent.run(message);
+            return travelAgent.call(message).getContent();
         }
     }
 }
