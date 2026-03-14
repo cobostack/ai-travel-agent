@@ -1,0 +1,40 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: ai-travel-agent
+  
+  ai:
+    # 配置 DashScope（阿里云百炼）
+    dashscope:
+      api-key: ${AI_DASHSCOPE_API_KEY:your-api-key-here}
+      chat:
+        options:
+          model: qwen-max  # 或 qwen-plus, qwen-turbo
+    
+    # 或使用 OpenAI
+    # openai:
+    #   api-key: ${OPENAI_API_KEY:your-api-key-here}
+    #   chat:
+    #     options:
+    #       model: gpt-4
+
+# 日志配置
+logging:
+  level:
+    com.example.travelagent: INFO
+    com.alibaba.cloud.ai: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 应用配置
+app:
+  weather:
+    # 天气 API 配置（wttr.in 免费，无需配置）
+    enabled: true
+  travel:
+    # 出行推荐配置
+    enabled: true
