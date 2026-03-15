@@ -1,6 +1,7 @@
 package com.example.travelagent.service;
 
 import com.alibaba.cloud.ai.graph.agent.ReactAgent;
+import com.alibaba.cloud.ai.graph.exception.GraphRunnerException;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ public class TravelService {
         String prompt = String.format("请查询 %s 的天气信息", city);
         
         // 调用 WeatherAgent
-        return weatherAgent.call(prompt).getContent();
+        return callAgent(weatherAgent, prompt);
     }
     
     /**
@@ -43,7 +44,7 @@ public class TravelService {
         );
         
         // 调用 TravelAgent
-        return travelAgent.call(prompt).getContent();
+        return callAgent(travelAgent, prompt);
     }
     
     /**
@@ -58,8 +59,8 @@ public class TravelService {
         );
         
         // 先查询天气，再生成推荐
-        String weather = weatherAgent.call(String.format("请查询 %s 的天气", city)).getContent();
-        String recommendation = travelAgent.call(String.format("基于以下天气信息，为 %s 生成出行推荐：%s", city, weather)).getContent();
+        String weather = callAgent(weatherAgent, String.format("请查询 %s 的天气", city));
+        String recommendation = callAgent(travelAgent, String.format("基于以下天气信息，为 %s 生成出行推荐：%s", city, weather));
         
         return String.format("🌤️ 天气信息：\n%s\n\n🎯 出行推荐：\n%s", weather, recommendation);
     }
@@ -72,9 +73,17 @@ public class TravelService {
         
         // 根据消息内容决定调用哪个 Agent
         if (message.contains("天气") || message.contains("温度")) {
-            return weatherAgent.call(message).getContent();
+            return callAgent(weatherAgent, message);
         } else {
-            return travelAgent.call(message).getContent();
+            return callAgent(travelAgent, message);
+        }
+    }
+
+    private String callAgent(ReactAgent agent, String prompt) {
+        try {
+            return agent.call(prompt).getText();
+        } catch (GraphRunnerException e) {
+            throw new RuntimeException("Agent 调用失败", e);
         }
     }
 }

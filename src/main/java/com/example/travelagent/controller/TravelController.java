@@ -1,6 +1,5 @@
 package com.example.travelagent.controller;
 
-import com.alibaba.cloud.ai.graph.agent.ReactAgent;
 import com.example.travelagent.service.TravelService;
 
 import lombok.Data;
@@ -23,8 +22,6 @@ import org.springframework.web.bind.annotation.*;
 public class TravelController {
     
     private final TravelService travelService;
-    private final ReactAgent weatherAgent;
-    private final ReactAgent travelAgent;
     
     /**
      * 查询天气
